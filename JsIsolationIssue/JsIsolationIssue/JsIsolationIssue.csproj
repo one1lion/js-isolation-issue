@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.5" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.0.4">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<PropertyGroup Label="Configuration">
+		<TypeScriptOutDir>wwwroot/js</TypeScriptOutDir>
+		<!-- Setting target compilation type so exports work correctly with JavaScript Isolation -->
+		<TypeScriptTarget>ES6</TypeScriptTarget>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<TypeScriptCompile Include="JsInterop\**\*.ts" />
+	</ItemGroup>
+	
+</Project>

@@ -1,0 +1,61 @@
+﻿@page "/"
+@using System.Diagnostics.CodeAnalysis;
+@using JsIsolationIssue.JsInterop;
+
+<PageTitle>Index</PageTitle>
+
+<h1>Sample Isolated JS Component</h1>
+<p>This component should use the Alert dialog for the browser to show an alert message. Unfortunately, I am not able to dynamically import the .js file to show the issue here (CORS issue; and I don't know how to get the .js file added to the repl directly to laod it dynamically).</p>
+<div>
+    <h4>Using JavaScript Isolation</h4>
+    <input type="text" @bind=_msg placeholder="Hello from C#!" />
+    <button @onclick=HandleShowMsg>Show Message Using JavaScript Isolation</button>
+    <button @onclick=HandleDoAlert>Show Message Using App JS Interop</button>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(_errorMsg))
+{
+    <hr />
+    <h3>Error while trying to use Isolated JS Module</h3>
+    <p class="text-danger">
+        @_errorMsg
+    </p>
+}
+
+@code {
+    [Inject, AllowNull] private IJSRuntime JsRuntime { get; set; }
+    private Task<IJSObjectReference>? _module;
+    private Task<IJSObjectReference> Module => _module ??= JsRuntime.InvokeAsync<IJSObjectReference>("import", "/js/MyInterop.js").AsTask();
+
+    private string? _msg;
+    private string? _errorMsg;
+
+    private async Task HandleShowMsg()
+    {
+        try
+        {
+            // The version that uses the compiled JavaScript Isolation file (/js/MyInterop.js)
+            if (string.IsNullOrWhiteSpace(_msg)) { _msg = null; }
+            var module = await Module;
+            await module.InvokeVoidAsync("showAlert", _msg ?? "Hello from C#!");
+        }
+        catch (Exception ex)
+        {
+            _errorMsg = $"From JavaScript Isolation: {ex.Message}";
+        }
+    }
+
+    private async Task HandleDoAlert()
+    {
+        try
+        {
+            // The version that uses the compiled JavaScript Interop file (/js/FullAppInterop.js -> which needs to be referenced in index.html)
+            if (string.IsNullOrWhiteSpace(_msg)) { _msg = null; }
+            await JsRuntime.DoAlertAsync(_msg ?? "Hello from C#!");
+        }
+        catch (Exception ex)
+        {
+            _errorMsg = $"From Full App JavaScript Interop: {ex.Message}";
+        }
+    }
+}
